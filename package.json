@@ -1,0 +1,34 @@
+{
+  "name": "toor",
+  "version": "1.0.0",
+  "description": "Take Out Of Rotation",
+  "main": "toor.js",
+  "scripts": {
+    "pretest": "standard",
+    "html": "nyc -r html node test",
+    "test": "nyc node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/bengl/toor.git"
+  },
+  "keywords": [
+    "oor",
+    "rotation",
+    "roundrobin",
+    "cluster"
+  ],
+  "author": "Bryan English <bryan@bryanenglish.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bengl/toor/issues"
+  },
+  "homepage": "https://github.com/bengl/toor#readme",
+  "dependencies": {
+    "shimmer": "^1.1.0"
+  },
+  "devDependencies": {
+    "nyc": "^6.6.1",
+    "standard": "^7.1.2"
+  }
+}
