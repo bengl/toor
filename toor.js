@@ -15,7 +15,7 @@ const isFunc = (f) => typeof f === 'function'
 const PAUSED = 'toor.paused'
 const PAUSE = 'toor.pause'
 const UNPAUSED = 'toor.unpaused'
-const UNPAUSE = 'toor.paused'
+const UNPAUSE = 'toor.unpause'
 
 exports.pause = function pause (worker, cb) {
   worker.once('message', (msg) => msg === PAUSED && cb())
