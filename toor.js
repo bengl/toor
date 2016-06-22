@@ -18,12 +18,24 @@ const UNPAUSED = 'toor.unpaused'
 const UNPAUSE = 'toor.unpause'
 
 exports.pause = function pause (worker, cb) {
-  worker.once('message', (msg) => msg === PAUSED && cb())
+  const onMessage = (msg) => {
+    if (msg === PAUSED) {
+      worker.removeListener('message', onMessage)
+      cb()
+    }
+  }
+  worker.on('message', onMessage)
   worker.send(PAUSE)
 }
 
 exports.unpause = function unpause (worker, cb) {
-  worker.once('message', (msg) => msg === UNPAUSED && cb())
+  const onMessage = (msg) => {
+    if (msg === UNPAUSED) {
+      worker.removeListener('message', onMessage)
+      cb()
+    }
+  }
+  worker.on('message', onMessage)
   worker.send(UNPAUSE)
 }
 
@@ -53,13 +65,21 @@ if (cluster.isWorker) {
 
   process.on('message', (msg) => {
     let len = servers.length
-    const send = (msg) => () => --len === 0 && process.send(msg)
-    const eachServer = (f) => servers.forEach(f)
+    const send = (msg) => () => { if (--len === 0) process.send(msg) }
+    const eachServer = (prop, msg, func) => {
+      servers.forEach((server) => {
+        if (server[prop]) func(server)
+        else send(msg)()
+      })
+    }
     if (msg === UNPAUSE) {
-      eachServer((server) => server.listen(...server[listenArgs], send(UNPAUSED)))
+      const listen = (server) =>
+        server.listen(...server[listenArgs], send(UNPAUSED))
+      eachServer(listenArgs, UNPAUSED, listen)
     }
     if (msg === PAUSE) {
-      eachServer((server) => server.close(send(PAUSED)))
+      const close = (server) => server.close(send(PAUSED))
+      eachServer('listening', PAUSED, close)
     }
   })
 }

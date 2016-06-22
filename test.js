@@ -26,6 +26,12 @@ if (cluster.isMaster) {
   net.createServer((socket) => {
     socket.end('' + cluster.worker.id)
   }).listen(3001, () => process.send('ready'))
+
+  // bogus server that never listens
+  http.createServer((req, res) => {})
+
+  // bogus messages shouldn't break things
+  process.on('message', () => process.send('slartibartfast'))
 }
 
 function getSeveralTimes (cb) {
