@@ -9,6 +9,7 @@ const cluster = require('cluster')
 const http = require('http')
 const net = require('net')
 const wrap = require('shimmer').wrap
+const addShutdown = require('http-shutdown')
 
 const isFunc = (f) => typeof f === 'function'
 
@@ -53,6 +54,7 @@ if (cluster.isWorker) {
   const createServerShimmer = (original) => {
     return function shimCreateServer (...args) {
       const server = original.apply(this, args)
+      if (server.hasOwnProperty('httpAllowHalfOpen')) addShutdown(server)
       servers.push(server)
       return server
     }
@@ -62,6 +64,14 @@ if (cluster.isWorker) {
   wrap(http, 'createServer', createServerShimmer)
   wrap(net.Server.prototype, 'listen', listenShimmer)
   wrap(net, 'createServer', createServerShimmer)
+
+  http.Server.prototype.toorShutdown = function (cb) {
+    this.shutdown(cb)
+  }
+
+  net.Server.prototype.toorShutdown = function (cb) {
+    this.close(cb)
+  }
 
   process.on('message', (msg) => {
     let len = servers.length
@@ -78,7 +88,7 @@ if (cluster.isWorker) {
       eachServer(listenArgs, UNPAUSED, listen)
     }
     if (msg === PAUSE) {
-      const close = (server) => server.close(send(PAUSED))
+      const close = (server) => server.toorShutdown(send(PAUSED))
       eachServer('listening', PAUSED, close)
     }
   })
