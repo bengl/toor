@@ -1,6 +1,6 @@
 {
   "name": "toor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Take Out Of Rotation",
   "main": "toor.js",
   "scripts": {
